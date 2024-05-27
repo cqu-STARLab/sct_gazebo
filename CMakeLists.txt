@@ -18,21 +18,13 @@ find_package(catkin REQUIRED
 
         gazebo_ros
         gazebo_ros_control
+        nav_msgs
         )
 
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
         INCLUDE_DIRS
         include
@@ -58,17 +50,24 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
         ${GAZEBO_INCLUDE_DIRS}
 )
+#link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Declare a cpp library
-add_library(sct_robot_hw_sim
-        src/sct_robot_hw_sim.cpp
-        )
+add_library(sct_robot_hw_sim src/sct_robot_hw_sim.cpp)
+add_library(sct_odom_sim src/sct_odom_sim.cpp)
 
 add_dependencies(sct_robot_hw_sim
         ${catkin_EXPORTED_TARGETS}
         )
+add_dependencies(sct_odom_sim
+        ${catkin_EXPORTED_TARGETS}
+        )
 
 target_link_libraries(sct_robot_hw_sim
+        ${catkin_LIBRARIES}
+        ${GAZEBO_LIBRARIES}
+        )
+target_link_libraries(sct_odom_sim
         ${catkin_LIBRARIES}
         ${GAZEBO_LIBRARIES}
         )
@@ -97,22 +96,5 @@ install(DIRECTORY config launch worlds
 install(FILES sct_robot_hw_sim_plugin.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
-
-#############
-## Testing ##
-#############
-
-#if (${CATKIN_ENABLE_TESTING})
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-#  ## Add gtest based cpp test target and link libraries
-#  catkin_add_gtest(${PROJECT_NAME}-test
-#      test/test_ros_package_template.cpp
-#      test/AlgorithmTest.cpp)
-#  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME}_core)
-#endif ()
-
-##########################
-## Static code analysis ##
-##########################
 
 roslint_cpp()

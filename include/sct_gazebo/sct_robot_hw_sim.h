@@ -10,9 +10,7 @@
 #include <sct_common/hardware_interface/scout_interface.h>
 
 #include <effort_controllers/joint_effort_controller.h>
-
 #include <effort_controllers/joint_velocity_controller.h>
-
 #include <geometry_msgs/Twist.h>
 
 namespace sct_gazebo

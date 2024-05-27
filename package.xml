@@ -22,6 +22,7 @@
     <depend>roscpp</depend>
     <depend>roslint</depend>
     <depend>sct_common</depend>
+    <depend>nav_msgs</depend>
 
     <depend>gazebo</depend>
     <depend>gazebo_ros</depend>

@@ -7,40 +7,17 @@
 
 namespace sct_gazebo
 {
-
-
 void SctOdomSim::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   // Store the pointer to the model
   model_ = _model;
 
   // Get parameters from SDF
-  if (_sdf->HasElement("frame_id"))
-    frame_id_ = _sdf->Get<std::string>("frame_id");
-  else{
-    frame_id_ = "base_link";
-    gzerr << "No frame_id specified, defaulting to set base_link" << std::endl;
-  }
-
-  if (_sdf->HasElement("child_frame_id"))
-    child_frame_id_ = _sdf->Get<std::string>("child_frame_id");
-  else{
-    child_frame_id_ = "base_link";
-    gzerr << "No child_frame_id_ specified, defaulting to set base_link" << std::endl;
-  }
-
-  if (_sdf->HasElement("topic_name"))
-    topic_name_ = _sdf->Get<std::string>("topic_name");
-  else{
-    topic_name_ = "odom";
-    gzerr << "No topic_name specified, defaulting to set odom" << std::endl;
-  }
-
   if (_sdf->HasElement("publish_rate"))
     publish_rate_ = _sdf->Get<double>("publish_rate");
   else{
-    publish_rate_ = 10.0;
-    gzerr << "No publish_rate specified, defaulting to set 10.0" << std::endl;
+    publish_rate_ = 50.0;
+    gzerr << "No publish_rate specified, defaulting to set 50.0" << std::endl;
   }
 
   if (_sdf->HasElement("robot_namespace"))
@@ -63,12 +40,21 @@ void SctOdomSim::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
   node_handle_ = new ros::NodeHandle(robot_namespace_);
 
   // Create a ROS publisher
-  odom_pub_ = node_handle_->advertise<nav_msgs::Odometry>(topic_name_, 1);
+  odom_pub_ = node_handle_->advertise<nav_msgs::Odometry>("odom", 1);
+
+  odom_msg_.header.frame_id = "odom";
+  odom_msg_.child_frame_id = "base_link";
+  odom_msg_.twist.covariance = {};
+
+  odom2base_.header.frame_id = node_handle_->getNamespace() + "odom";
+  odom2base_.header.stamp = ros::Time::now();
+  odom2base_.child_frame_id = node_handle_->getNamespace() + "base_link";
+  odom2base_.transform.rotation.w = 1;
 
   // Get the link
-  robot_link_ = model_->GetLink(child_frame_id_);
+  robot_link_ = model_->GetLink("base_link");
   if (!robot_link_)
-    gzerr << "Link with name " << robot_link_ << " not found!" << std::endl;
+    ROS_INFO_STREAM("Link with name " << robot_link_ << " not found!" << std::endl);
 
   // Connect to the world update event
   update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&SctOdomSim::Update, this));
@@ -82,23 +68,33 @@ void SctOdomSim::Update()
   {
     // Get the pose of the link
     ignition::math::Pose3d pose = robot_link_->WorldPose();
+    ignition::math::Vector3d linear_vel = robot_link_->RelativeLinearVel();
+    ignition::math::Vector3d angular_vel = robot_link_->RelativeAngularVel();
+
+    rpy_to_quat_.setRPY(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z());
 
     // Create a nav_msgs/Odometry message
-    nav_msgs::Odometry odom_msg;
-    odom_msg.header.stamp = current_time;
-    odom_msg.header.frame_id = frame_id_;
-    odom_msg.child_frame_id = child_frame_id_;
+    odom2base_.header.stamp = ros::Time::now();
+    odom2base_.transform.translation.x = pose.Pos().X();
+    odom2base_.transform.translation.y = pose.Pos().Y();
+    odom2base_.transform.translation.z = pose.Pos().Z();
+    odom2base_.transform.rotation.x = rpy_to_quat_.x();
+    odom2base_.transform.rotation.y = rpy_to_quat_.y();
+    odom2base_.transform.rotation.z = rpy_to_quat_.z();
+    odom2base_.transform.rotation.w = rpy_to_quat_.w();
+    tf_broadcaster_.sendTransform(odom2base_);
 
-    odom_msg.pose.pose.position.x = pose.Pos().X();
-    odom_msg.pose.pose.position.y = pose.Pos().Y();
-    odom_msg.pose.pose.position.z = pose.Pos().Z();
-    odom_msg.pose.pose.orientation.x = pose.Rot().X();
-    odom_msg.pose.pose.orientation.y = pose.Rot().Y();
-    odom_msg.pose.pose.orientation.z = pose.Rot().Z();
-    odom_msg.pose.pose.orientation.w = pose.Rot().W();
-
-    // Publish the message
-    odom_pub_.publish(odom_msg);
+    odom_msg_.header.stamp = ros::Time::now();
+    odom_msg_.pose.pose.position.x = pose.Pos().X();
+    odom_msg_.pose.pose.position.y = pose.Pos().Y();
+    odom_msg_.pose.pose.orientation.x = rpy_to_quat_.x();
+    odom_msg_.pose.pose.orientation.y = rpy_to_quat_.y();
+    odom_msg_.pose.pose.orientation.z = rpy_to_quat_.z();
+    odom_msg_.pose.pose.orientation.w = rpy_to_quat_.w();
+    odom_msg_.twist.twist.linear.x = linear_vel.X();
+    odom_msg_.twist.twist.linear.y = linear_vel.Y();
+    odom_msg_.twist.twist.angular.z = linear_vel.Z();
+    odom_pub_.publish(odom_msg_);
 
     last_publish_time_ = current_time;
   }

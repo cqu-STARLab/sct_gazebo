@@ -6,6 +6,8 @@
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <nav_msgs/Odometry.h>
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/Plugin.hh>
@@ -18,7 +20,7 @@ namespace sct_gazebo
 class SctOdomSim:public gazebo::ModelPlugin{
 public:
   SctOdomSim() {}
-  virtual ~SctOdomSim() {
+  ~SctOdomSim() {
     node_handle_->shutdown();
     delete node_handle_;
   }
@@ -35,13 +37,16 @@ private:
   gazebo::event::ConnectionPtr update_connection_;
   ros::NodeHandle* node_handle_;
 
+  nav_msgs::Odometry odom_msg_;
   ros::Publisher odom_pub_;
-  std::string frame_id_;
-  std::string child_frame_id_;
-  std::string topic_name_;
+  geometry_msgs::TransformStamped odom2base_;
+  tf2_ros::TransformBroadcaster tf_broadcaster_;
+  ros::Time last_publish_time_;
+
+  // parameters
   double publish_rate_;
   std::string robot_namespace_;
-  ros::Time last_publish_time_;
+  tf2::Quaternion rpy_to_quat_;
 };
 }
 

@@ -88,8 +88,8 @@ void SctRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 {
   if (sct_command_data_.motion_ctl_cmd.update_cmd)
   {
-    Eigen::Vector2d vel_chassis;
-    vel_chassis << sct_command_data_.motion_ctl_cmd.angle_vel, sct_command_data_.motion_ctl_cmd.linear_vel;
+    Eigen::Matrix<double, 2, 1>  vel_chassis;
+    vel_chassis << sct_command_data_.motion_ctl_cmd.linear_vel, sct_command_data_.motion_ctl_cmd.angle_vel;
     Eigen::VectorXd vel_joints = chassis2joints_ * vel_chassis;
 
     for (size_t i = 0; i < joints_.size(); i++)

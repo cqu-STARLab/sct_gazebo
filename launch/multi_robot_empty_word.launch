@@ -11,22 +11,20 @@
 
     <group ns="scout1">
         <arg name="robot_ns" default="scout1" doc="Robot name [scout1, scout2, scout3]"/>
-        <rosparam file="$(find sct_gazebo)/config/scout1_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
+        <rosparam file="$(find sct_gazebo)/config/scout_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
             use_sim:=true robot_ns:=$(arg robot_ns)"/>
-       <!-- push robot_description to factory and spawn robot in gazebo -->
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
             args="-x 0 -y 0 -z 0.2 -param robot_description -urdf -model $(arg robot_ns)" output="screen"/>
     </group>
 
     <group ns="scout2">
         <arg name="robot_ns" default="scout2" doc="Robot name [scout1, scout2, scout3]"/>
-        <rosparam file="$(find sct_gazebo)/config/scout1_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
+        <rosparam file="$(find sct_gazebo)/config/scout_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
             use_sim:=true robot_ns:=$(arg robot_ns)"/>
-       push robot_description to factory and spawn robot in gazebo
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
             args="-x 2 -y 2 -z 0.2 -param robot_description -urdf -model $(arg robot_ns)" output="screen"/>
     </group>

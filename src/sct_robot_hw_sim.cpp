@@ -5,6 +5,7 @@
 #include "sct_gazebo/sct_robot_hw_sim.h"
 
 #include <string>
+#include <tinyxml.h>
 #include <gazebo_ros_control/gazebo_ros_control_plugin.h>
 #include <control_toolbox/pid.h>
 
@@ -17,6 +18,8 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
   bool ret = DefaultRobotHWSim::initSim(robot_namespace, model_nh, parent_model, urdf_model, transmissions);
 
   XmlRpc::XmlRpcValue wheels;
+
+  ROS_INFO_STREAM("Get robot: " << model_nh.getNamespace() << " successfully");
   if (!model_nh.getParam("scout_wheels", wheels))
     ROS_WARN("No sct_wheels specified");
   else
@@ -29,6 +32,17 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
       ROS_ASSERT(wheel.second["pose"].getType() == XmlRpc::XmlRpcValue::TypeArray);
       ROS_ASSERT(wheel.second["pose"].size() == 3);
       ROS_ASSERT(wheel.second.hasMember("wheel_radius"));
+
+      for (const auto& transmission : transmissions){
+        for (size_t i = 0; i < transmission.joints_.size(); ++i){
+          std::string wheel_joint = wheel.second["joint"];
+          if(!std::strcmp(transmission.joints_[i].name_.c_str(), wheel_joint.c_str())){
+            TiXmlDocument actuator_xml;
+            actuator_xml.Parse(transmission.actuators_[i].xml_element_.c_str());
+            joint2trans_.push_back(std::stod(actuator_xml.FirstChildElement("actuator")->FirstChildElement("mechanicalReduction")->GetText()));
+          }
+        }
+      }
 
       Eigen::MatrixXd chassis2joint(1, 2);
       chassis2joint << 1.0 / (double)wheel.second["wheel_radius"],
@@ -46,12 +60,6 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
     }
   }
 
-  if (!model_nh.getParam("/robot_name", robot_name_))
-  {
-    ROS_WARN("No robot_name specified.");
-    return false;
-  }
-
   sct_command_data_.stamp = ros::Time::now();
   sct_command_data_.motion_ctl_cmd.linear_vel = 0;
   sct_command_data_.motion_ctl_cmd.angle_vel = 0;
@@ -66,7 +74,7 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
   sct_command_data_.light_set_cmd.count_check = 0;
   sct_command_data_.light_set_cmd.update_cmd = false;
 
-  sct_common::ScoutHandle scout_handle(robot_name_, &sct_command_data_);
+  sct_common::ScoutHandle scout_handle(model_nh.getNamespace(), &sct_command_data_);
   scout_interface_.registerHandle(scout_handle);
   registerInterface(&scout_interface_);
 
@@ -94,7 +102,7 @@ void SctRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 
     for (size_t i = 0; i < joints_.size(); i++)
     {
-      joints_[i]->setCommand(vel_joints(i));
+      joints_[i]->setCommand(vel_joints(i)*joint2trans_[i]);
       joints_[i]->update(time, period);
     }
     sct_command_data_.motion_ctl_cmd.update_cmd = false;

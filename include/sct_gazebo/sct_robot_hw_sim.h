@@ -75,14 +75,13 @@ public:
   void writeSim(ros::Time time, ros::Duration period) override;
 
 private:
-  std::string robot_name_;
-
   sct_common::ScoutCommandData sct_command_data_;
   sct_common::ScoutInterface scout_interface_;
 
   Eigen::MatrixXd chassis2joints_;
 
   std::vector<std::shared_ptr<SimpleJointVelocityController>> joints_;
+  std::vector<double> joint2trans_;
 };
 
 }  // namespace sct_gazebo

@@ -6,8 +6,10 @@
     <rosparam file="$(find sct_gazebo)/config/sct_robot_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
 
     <param name="robot_name" value="$(arg robot_name)"/>
+
     <param name="robot_description"
-           command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro use_sim:=true "/>
+           command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
+           use_sim:=true robot_name:=$(arg robot_name)"/>
 
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">

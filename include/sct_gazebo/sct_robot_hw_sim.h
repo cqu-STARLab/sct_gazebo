@@ -5,7 +5,6 @@
 #pragma once
 
 #include <Eigen/Dense>
-
 #include <gazebo_ros_control/default_robot_hw_sim.h>
 #include <sct_common/hardware_interface/scout_interface.h>
 
@@ -78,6 +77,8 @@ private:
   sct_common::ScoutCommandData sct_command_data_;
   sct_common::ScoutInterface scout_interface_;
 
+  control_toolbox::Pid angle_pid_controller_;
+  gazebo::physics::LinkPtr base_link_;
   Eigen::MatrixXd chassis2joints_;
 
   std::vector<std::shared_ptr<SimpleJointVelocityController>> joints_;

@@ -71,7 +71,7 @@ void SctOdomSim::Update()
     ignition::math::Vector3d linear_vel = robot_link_->RelativeLinearVel();
     ignition::math::Vector3d angular_vel = robot_link_->RelativeAngularVel();
 
-    rpy_to_quat_.setRPY(pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z());
+    rpy_to_quat_.setRPY(pose.Rot().Roll(), pose.Rot().Pitch(), pose.Rot().Yaw());
 
     // Create a nav_msgs/Odometry message
     odom2base_.header.stamp = ros::Time::now();

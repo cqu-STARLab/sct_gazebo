@@ -17,6 +17,13 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
 {
   bool ret = DefaultRobotHWSim::initSim(robot_namespace, model_nh, parent_model, urdf_model, transmissions);
 
+  if (!model_nh.hasParam("angular_control"))
+    ROS_WARN_STREAM("No " << model_nh.getNamespace() <<" angular_control specified");
+  if (!angle_pid_controller_.init(ros::NodeHandle(model_nh, "angular_control/pid")))
+    return false;
+
+  base_link_ = parent_model->GetLink("base_link");
+
   XmlRpc::XmlRpcValue wheels;
 
   ROS_INFO_STREAM("Get robot: " << model_nh.getNamespace() << " successfully");
@@ -94,6 +101,8 @@ void SctRobotHWSim::readSim(ros::Time time, ros::Duration period)
 
 void SctRobotHWSim::writeSim(ros::Time time, ros::Duration period)
 {
+  double error = sct_command_data_.motion_ctl_cmd.angle_vel - base_link_->RelativeAngularVel().Z();
+  sct_command_data_.motion_ctl_cmd.angle_vel = angle_pid_controller_.computeCommand(error, period);
   if (sct_command_data_.motion_ctl_cmd.update_cmd)
   {
     Eigen::Matrix<double, 2, 1>  vel_chassis;

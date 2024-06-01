@@ -93,7 +93,10 @@ void SctOdomSim::Update()
     odom_msg_.pose.pose.orientation.w = rpy_to_quat_.w();
     odom_msg_.twist.twist.linear.x = linear_vel.X();
     odom_msg_.twist.twist.linear.y = linear_vel.Y();
-    odom_msg_.twist.twist.angular.z = linear_vel.Z();
+    odom_msg_.twist.twist.linear.z = linear_vel.Z();
+    odom_msg_.twist.twist.angular.x = angular_vel.X();
+    odom_msg_.twist.twist.angular.y = angular_vel.Y();
+    odom_msg_.twist.twist.angular.z = angular_vel.Z();
     odom_pub_.publish(odom_msg_);
 
     last_publish_time_ = current_time;

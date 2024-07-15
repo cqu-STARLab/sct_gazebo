@@ -23,7 +23,7 @@ void SctOdomSim::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("robot_namespace"))
     robot_namespace_ = _sdf->Get<std::string>("robot_namespace");
   else{
-    robot_namespace_ = "scout";
+    robot_namespace_ = "/";
     ROS_ERROR_STREAM("No robot_namespace specified, defaulting to set scout.");
   }
 
@@ -42,19 +42,19 @@ void SctOdomSim::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // Create a ROS publisher
   odom_pub_ = node_handle_->advertise<nav_msgs::Odometry>("odom", 1);
 
-  odom_msg_.header.frame_id = robot_namespace_ + "_odom";
-  odom_msg_.child_frame_id = robot_namespace_ + "_base_link";
+  odom_msg_.header.frame_id = "odom";
+  odom_msg_.child_frame_id = "base_link";
   odom_msg_.twist.covariance = {};
 
-  odom2base_.header.frame_id = robot_namespace_ + "_odom";
+  odom2base_.header.frame_id = "odom";
   odom2base_.header.stamp = ros::Time::now();
-  odom2base_.child_frame_id = robot_namespace_ + "_base_link";
+  odom2base_.child_frame_id = "base_link";
   odom2base_.transform.rotation.w = 1;
 
   // Get the link
-  robot_link_ = model_->GetLink(robot_namespace_+"_base_link");
+  robot_link_ = model_->GetLink("base_link");
   if (!robot_link_)
-    ROS_INFO_STREAM("Link with name " << robot_namespace_ << "_base_link" << " not found!" << std::endl);
+    ROS_INFO_STREAM("Link with name " << "base_link" << " not found!" << std::endl);
 
   // Connect to the world update event
   update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&SctOdomSim::Update, this));

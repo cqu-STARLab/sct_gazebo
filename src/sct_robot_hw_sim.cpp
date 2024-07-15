@@ -22,7 +22,7 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
   if (!angle_pid_controller_.init(ros::NodeHandle(model_nh, "angular_control/pid")))
     return false;
 
-  base_link_ = parent_model->GetLink(robot_namespace + "_base_link");
+  base_link_ = parent_model->GetLink("base_link");
 
   XmlRpc::XmlRpcValue wheels;
 

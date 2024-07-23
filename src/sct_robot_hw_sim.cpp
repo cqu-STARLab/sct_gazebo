@@ -22,15 +22,20 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
   if (!angle_pid_controller_.init(ros::NodeHandle(model_nh, "angular_control/pid")))
     return false;
 
-  base_link_ = parent_model->GetLink(robot_namespace + "_base_link");
+  base_link_ = parent_model->GetLink("base_link");
+  if (!base_link_){
+    ROS_ERROR_STREAM("Gazebo physics link with name: " << robot_namespace << " base_link" << " not found!" << std::endl);
+    return false;
+  }
 
   XmlRpc::XmlRpcValue wheels;
 
   ROS_INFO_STREAM("Get robot: " << model_nh.getNamespace() << " successfully");
-  if (!model_nh.getParam("scout_wheels", wheels))
-    ROS_WARN("No sct_wheels specified");
-  else
-  {
+  if (!model_nh.getParam("scout_wheels", wheels)){
+    ROS_ERROR_STREAM("No sct_wheels specified");
+    return false;
+  }
+  else{
     chassis2joints_.resize(wheels.size(), 2);
     size_t i = 0;
     for (const auto& wheel : wheels)
@@ -85,6 +90,8 @@ bool SctRobotHWSim::initSim(const std::string& robot_namespace, ros::NodeHandle 
   scout_interface_.registerHandle(scout_handle);
   registerInterface(&scout_interface_);
 
+  if(ret)
+    ROS_INFO_STREAM("sct_robot_hw_sim Init successful!");
   return ret;
 }
 

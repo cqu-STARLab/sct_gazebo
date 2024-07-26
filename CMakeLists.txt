@@ -19,6 +19,8 @@ find_package(catkin REQUIRED
         gazebo_ros
         gazebo_ros_control
         nav_msgs
+
+        sensor_msgs
         )
 
 # Depend on system install of Gazebo
@@ -55,11 +57,15 @@ include_directories(
 ## Declare a cpp library
 add_library(sct_robot_hw_sim src/sct_robot_hw_sim.cpp)
 add_library(sct_odom_sim src/sct_odom_sim.cpp)
+add_library(imu_sim src/imu_sim.cpp)
 
 add_dependencies(sct_robot_hw_sim
         ${catkin_EXPORTED_TARGETS}
         )
 add_dependencies(sct_odom_sim
+        ${catkin_EXPORTED_TARGETS}
+        )
+add_dependencies(imu_sim
         ${catkin_EXPORTED_TARGETS}
         )
 
@@ -68,6 +74,10 @@ target_link_libraries(sct_robot_hw_sim
         ${GAZEBO_LIBRARIES}
         )
 target_link_libraries(sct_odom_sim
+        ${catkin_LIBRARIES}
+        ${GAZEBO_LIBRARIES}
+        )
+target_link_libraries(imu_sim
         ${catkin_LIBRARIES}
         ${GAZEBO_LIBRARIES}
         )

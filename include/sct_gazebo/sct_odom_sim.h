@@ -30,8 +30,6 @@ public:
   virtual void Update();
 
 private:
-  void QueueThread();
-
   gazebo::physics::ModelPtr model_;
   gazebo::physics::LinkPtr robot_link_;
   gazebo::event::ConnectionPtr update_connection_;

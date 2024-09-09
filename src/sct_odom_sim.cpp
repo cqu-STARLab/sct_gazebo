@@ -42,13 +42,13 @@ void SctOdomSim::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // Create a ROS publisher
   odom_pub_ = node_handle_->advertise<nav_msgs::Odometry>("odom", 1);
 
-  odom_msg_.header.frame_id = robot_namespace_ + "odom";
-  odom_msg_.child_frame_id = robot_namespace_ + "base_link";
+  odom_msg_.header.frame_id = "odom";
+  odom_msg_.child_frame_id = "base_link";
   odom_msg_.twist.covariance = {};
 
-  odom2base_.header.frame_id = robot_namespace_ + "odom";
+  odom2base_.header.frame_id = "odom";
   odom2base_.header.stamp = ros::Time::now();
-  odom2base_.child_frame_id = robot_namespace_ + "base_link";
+  odom2base_.child_frame_id = "base_link";
   odom2base_.transform.rotation.w = 1;
 
   // Get the link

@@ -85,4 +85,4 @@ private:
   std::vector<double> joint2trans_;
 };
 
-}  // namespace sct_gazebo
+}  // namespace ep_gazebo

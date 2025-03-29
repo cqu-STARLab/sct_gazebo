@@ -2,6 +2,9 @@
     <arg name="use_sim" default="true"/>
     <arg name="paused" default="false"/>
 
+    <arg name="robot1_name" default="sct1"/>
+    <arg name="robot2_name" default="sct2"/>
+
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="paused" value="$(arg paused)"/>
@@ -9,24 +12,40 @@
     </include>
 
 
-    <group ns="scout1">
-        <arg name="robot_ns" default="scout1" doc="Robot name [scout1, scout2, scout3]"/>
-        <rosparam file="$(find sct_gazebo)/config/scout_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
+    <group ns="$(arg robot1_name)">
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
-            use_sim:=true robot_ns:=$(arg robot_ns)"/>
+            use_sim:=true"/>
+
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
-            args="-x 0 -y 0 -z 0.2 -param robot_description -urdf -model $(arg robot_ns)" output="screen"/>
+            args="-x 0 -y 0 -z 0.2 -param robot_description -urdf -model $(arg robot1_name)" output="screen"/>
+
+        <node name="$(arg robot1_name)_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+            <param name="publish_frequency" type="double" value="50.0"/>
+            <param name="tf_prefix" type="string" value="$(arg robot1_name)"/>
+        </node>
+
+        <node name="$(arg robot1_name)_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
+            <param name="rate" type="double" value="50.0"/>
+        </node>
     </group>
 
-    <group ns="scout2">
-        <arg name="robot_ns" default="scout2" doc="Robot name [scout1, scout2, scout3]"/>
-        <rosparam file="$(find sct_gazebo)/config/scout_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
+    <group ns="$(arg robot2_name)">
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
-            use_sim:=true robot_ns:=$(arg robot_ns)"/>
+            use_sim:=true"/>
+
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
-            args="-x 2 -y 2 -z 0.2 -param robot_description -urdf -model $(arg robot_ns)" output="screen"/>
+            args="-x 2 -y 2 -z 0.2 -param robot_description -urdf -model $(arg robot2_name)" output="screen"/>
+
+        <node name="state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+            <param name="publish_frequency" type="double" value="50.0"/>
+            <param name="tf_prefix" type="string" value="$(arg robot2_name)"/>
+        </node>
+
+        <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
+            <param name="rate" type="double" value="50.0"/>
+        </node>
     </group>
 
 

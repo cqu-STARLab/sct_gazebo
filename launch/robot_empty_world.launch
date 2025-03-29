@@ -1,0 +1,37 @@
+<launch>
+    <arg name="robot_name" default="scout" doc="Robot name [scout1, scout2, scout3]"/>
+    <arg name="use_sim" default="true"/>
+    <arg name="paused" default="false"/>
+
+    <rosparam file="$(find sct_gazebo)/config/scout_hw_sim.yaml" command="load" if="$(arg use_sim)"/>
+
+    <param name="robot_name" value="$(arg robot_name)"/>
+
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
+           use_sim:=$(arg use_sim) robot_name:=$(arg robot_name)"/>
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="world_name" value="$(find sct_gazebo)/worlds/empty.world"/>
+    </include>
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
+          args="-z 0.2 -param robot_description -urdf -model $(arg robot_name)" output="screen"/>
+
+
+    <node name="state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="50.0"/>
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
+        <param name="rate" type="double" value="50.0"/>
+    </node>
+
+    <arg name="rviz" default="true"/>
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="$(anon rviz)" respawn="false" output="screen"
+        args="-d $(find sct_gazebo)/config/example.rviz" />
+
+</launch>

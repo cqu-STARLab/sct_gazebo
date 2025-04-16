@@ -19,23 +19,45 @@ find_package(catkin REQUIRED
         gazebo_ros
         gazebo_ros_control
         nav_msgs
-
+        controller_interface
+        control_msgs
+        dynamic_reconfigure
+        geometry_msgs
+        hardware_interface
+        nav_msgs
+        pluginlib
+        realtime_tools
+        tf
+        urdf
         sensor_msgs
         )
 
+find_package(Boost REQUIRED)
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
+# Declare a catkin package
+generate_dynamic_reconfigure_options(config/DiffDriveController.cfg)
+
 catkin_package(
-        INCLUDE_DIRS
-        include
-        LIBRARIES
+        INCLUDE_DIRS include
+        CATKIN_DEPENDS
+        LIBRARIES ${PROJECT_NAME}
+        DEPENDS Boost
         sct_hw_sim
         CATKIN_DEPENDS
         roscpp
         sct_common
 
+        controller_interface
+        control_msgs
+        dynamic_reconfigure
+        geometry_msgs
+        hardware_interface
+        nav_msgs
+        realtime_tools
+        tf
         gazebo_ros
         gazebo_ros_control
         DEPENDS
@@ -83,14 +105,13 @@ target_link_libraries(imu_sim
         ${GAZEBO_LIBRARIES}
         )
 
-add_library(sct_chassis_sim src/sct_chassis_sim.cpp)
-add_dependencies(sct_chassis_sim
-        ${catkin_EXPORTED_TARGETS}
+add_library(sct_drive_controller
+        src/sct_drive_controller.cpp
+        src/odometry.cpp
+        src/speed_limiter.cpp
         )
-target_link_libraries(sct_chassis_sim
-        ${catkin_LIBRARIES}
-        ${GAZEBO_LIBRARIES}
-        )
+target_link_libraries(sct_drive_controller ${catkin_LIBRARIES})
+add_dependencies(sct_drive_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 
 #############
@@ -99,6 +120,12 @@ target_link_libraries(sct_chassis_sim
 
 ## Mark executables and/or libraries for installation
 install(TARGETS sct_robot_hw_sim
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        )
+
+install(TARGETS sct_drive_controller
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -115,6 +142,9 @@ install(DIRECTORY config launch worlds
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
 install(FILES sct_robot_hw_sim_plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        )
+install(FILES sct_drive_controller_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
 

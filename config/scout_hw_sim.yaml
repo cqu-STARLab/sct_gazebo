@@ -11,11 +11,11 @@ scout_wheels:
     pose: [ 0.232, 0.20825, -0.1 ] # x y beta
     joint: left_front_wheel_joint
     <<: *wheel_setting
-  left_back:
+  left_rear:
     pose: [ -0.232, 0.20825, -0.1 ]
-    joint: left_back_wheel_joint
+    joint: left_rear_wheel_joint
     <<: *wheel_setting
-  right_back:
+  right_rear:
     pose: [ -0.232, -0.20825, -0.1 ]
-    joint: right_back_wheel_joint
+    joint: right_rear_wheel_joint
     <<: *wheel_setting

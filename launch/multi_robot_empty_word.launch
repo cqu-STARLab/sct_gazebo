@@ -15,7 +15,7 @@
     <group ns="$(arg robot1_name)">
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
-            use_sim:=true"/>
+            use_sim:=true ns:=$(arg robot1_name)"/>
 
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
             args="-x 0 -y 0 -z 0.2 -param robot_description -urdf -model $(arg robot1_name)" output="screen"/>
@@ -28,12 +28,16 @@
         <node name="$(arg robot1_name)_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
             <param name="rate" type="double" value="50.0"/>
         </node>
+
+        <rosparam command="load" file="$(find sct_gazebo)/config/control.yaml" />
+        <node if="$(arg use_sim)" name="controller_spawner" pkg="controller_manager" type="spawner"
+            args="sct_chassis_controller" />
     </group>
 
     <group ns="$(arg robot2_name)">
         <param name="robot_description"
             command="$(find xacro)/xacro $(find sct_description)/urdf/scout/scout_mini.urdf.xacro
-            use_sim:=true"/>
+            use_sim:=true ns:=$(arg robot2_name)"/>
 
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
             args="-x 2 -y 2 -z 0.2 -param robot_description -urdf -model $(arg robot2_name)" output="screen"/>
@@ -46,6 +50,10 @@
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen">
             <param name="rate" type="double" value="50.0"/>
         </node>
+
+        <rosparam if="$(arg use_sim)" command="load" file="$(find sct_gazebo)/config/control.yaml" />
+        <node if="$(arg use_sim)" name="controller_spawner" pkg="controller_manager" type="spawner"
+            args="sct_chassis_controller" />
     </group>
 
 

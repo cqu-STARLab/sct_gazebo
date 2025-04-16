@@ -353,7 +353,7 @@ namespace sct_drive_controller{
       right_wheel_joints_[i] = hw->getHandle(right_wheel_names[i]);  // throws on failure
     }
 
-    sub_command_ = controller_nh.subscribe("cmd_vel", 1, &DiffDriveController::cmdVelCallback, this);
+    sub_command_ = root_nh.subscribe("cmd_vel", 1, &DiffDriveController::cmdVelCallback, this);
 
     // Initialize dynamic parameters
     DynamicParams dynamic_params;

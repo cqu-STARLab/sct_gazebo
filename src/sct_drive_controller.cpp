@@ -181,9 +181,8 @@ namespace sct_drive_controller{
 
     if (left_wheel_names.size() != right_wheel_names.size())
     {
-      ROS_ERROR_STREAM_NAMED(name_,
-          "#left wheels (" << left_wheel_names.size() << ") != " <<
-          "#right wheels (" << right_wheel_names.size() << ").");
+      ROS_ERROR_STREAM_NAMED(name_, "#left wheels (" << left_wheel_names.size() << ") != " <<
+                                    "#right wheels (" << right_wheel_names.size() << ").");
       return false;
     }
     else
@@ -204,8 +203,7 @@ namespace sct_drive_controller{
     controller_nh.param("open_loop", open_loop_, open_loop_);
 
     controller_nh.param("wheel_separation_multiplier", wheel_separation_multiplier_, wheel_separation_multiplier_);
-    ROS_INFO_STREAM_NAMED(name_, "Wheel separation will be multiplied by "
-                          << wheel_separation_multiplier_ << ".");
+    ROS_INFO_STREAM_NAMED(name_, "Wheel separation will be multiplied by " << wheel_separation_multiplier_ << ".");
 
     if (controller_nh.hasParam("wheel_radius_multiplier"))
     {
@@ -221,10 +219,8 @@ namespace sct_drive_controller{
       controller_nh.param("right_wheel_radius_multiplier", right_wheel_radius_multiplier_, right_wheel_radius_multiplier_);
     }
 
-    ROS_INFO_STREAM_NAMED(name_, "Left wheel radius will be multiplied by "
-                          << left_wheel_radius_multiplier_ << ".");
-    ROS_INFO_STREAM_NAMED(name_, "Right wheel radius will be multiplied by "
-                          << right_wheel_radius_multiplier_ << ".");
+    ROS_INFO_STREAM_NAMED(name_, "Left wheel radius will be multiplied by " << left_wheel_radius_multiplier_ << ".");
+    ROS_INFO_STREAM_NAMED(name_, "Right wheel radius will be multiplied by " << right_wheel_radius_multiplier_ << ".");
 
     int velocity_rolling_window_size = 10;
     controller_nh.param("velocity_rolling_window_size", velocity_rolling_window_size, velocity_rolling_window_size);
@@ -571,8 +567,7 @@ namespace sct_drive_controller{
       XmlRpc::XmlRpcValue wheel_list;
       if (!controller_nh.getParam(wheel_param, wheel_list))
       {
-        ROS_ERROR_STREAM_NAMED(name_,
-            "Couldn't retrieve wheel param '" << wheel_param << "'.");
+        ROS_ERROR_STREAM_NAMED(name_, "Couldn't retrieve wheel param '" << wheel_param << "'.");
         return false;
       }
 
@@ -580,8 +575,7 @@ namespace sct_drive_controller{
       {
         if (wheel_list.size() == 0)
         {
-          ROS_ERROR_STREAM_NAMED(name_,
-              "Wheel param '" << wheel_param << "' is an empty list");
+          ROS_ERROR_STREAM_NAMED(name_, "Wheel param '" << wheel_param << "' is an empty list");
           return false;
         }
 
@@ -589,9 +583,7 @@ namespace sct_drive_controller{
         {
           if (wheel_list[i].getType() != XmlRpc::XmlRpcValue::TypeString)
           {
-            ROS_ERROR_STREAM_NAMED(name_,
-                "Wheel param '" << wheel_param << "' #" << i <<
-                " isn't a string.");
+            ROS_ERROR_STREAM_NAMED(name_, "Wheel param '" << wheel_param << "' #" << i << " isn't a string.");
             return false;
           }
         }
@@ -608,9 +600,7 @@ namespace sct_drive_controller{
       }
       else
       {
-        ROS_ERROR_STREAM_NAMED(name_,
-            "Wheel param '" << wheel_param <<
-            "' is neither a list of strings nor a string.");
+        ROS_ERROR_STREAM_NAMED(name_, "Wheel param '" << wheel_param << "' is neither a list of strings nor a string.");
         return false;
       }
 
